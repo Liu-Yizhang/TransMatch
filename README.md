@@ -32,5 +32,4 @@ We provide a pretrained model on YFCC100M. The results in our paper can be repro
 ## Train model on YFCC100M
 Please run the training script to train our model on YFCC100M after the data processing is done.
 
-    python main.py ./data_dump/yfcc-sift-2000-train.hdf5
-    --data_te ./data_dump/yfcc-sift-2000-test.hdf5
+    python main.py
