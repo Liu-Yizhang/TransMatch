@@ -5,11 +5,11 @@ from Transformer import Transformer
 from einops import rearrange, repeat
 
 def knn(x, k):
-    inner = -2*torch.matmul(x.transpose(2, 1), x) #inner[32,2000,2000]内积？
-    xx = torch.sum(x**2, dim=1, keepdim=True) #xx[32,1,2000]
-    pairwise_distance = -xx - inner - xx.transpose(2, 1) #distance[32,2000,2000]****记得回头看
+    inner = -2*torch.matmul(x.transpose(2, 1), x) 
+    xx = torch.sum(x**2, dim=1, keepdim=True) 
+    pairwise_distance = -xx - inner - xx.transpose(2, 1) 
 
-    idx = pairwise_distance.topk(k=k, dim=-1)[1]   # (batch_size, num_points, k) [32,2000,9] [32,1000,6]
+    idx = pairwise_distance.topk(k=k, dim=-1)[1]  
 
     return idx[:, :, :]
 
@@ -18,7 +18,7 @@ def get_graph_feature(x, k=20, idx=None):
     # x[32,128,1000,1],k=6
     batch_size = x.size(0)
     num_points = x.size(2)
-    x = x.view(batch_size, -1, num_points) #x[32,128,2000]
+    x = x.view(batch_size, -1, num_points) 
     if idx is None:
         idx_out = knn(x, k=k) #idx_out[32,2000,9]
     else:
@@ -33,11 +33,11 @@ def get_graph_feature(x, k=20, idx=None):
 
     _, num_dims, _ = x.size()
 
-    x = x.transpose(2, 1).contiguous() #x[32,2000,128]
+    x = x.transpose(2, 1).contiguous() 
     feature = x.view(batch_size*num_points, -1)[idx, :]
-    feature = feature.view(batch_size, num_points, k, num_dims) #feature[32,2000,9,128]
-    x = x.view(batch_size, num_points, 1, num_dims).repeat(1, 1, k, 1) #x[32,2000,9,128]
-    feature = torch.cat((x, x - feature), dim=3).permute(0, 3, 1, 2).contiguous() #feature[32,256,2000,9] 图特征
+    feature = feature.view(batch_size, num_points, k, num_dims) 
+    x = x.view(batch_size, num_points, 1, num_dims).repeat(1, 1, k, 1) 
+    feature = torch.cat((x, x - feature), dim=3).permute(0, 3, 1, 2).contiguous() 
     return feature
 
 class ResNet_Block(nn.Module):
@@ -76,8 +76,8 @@ def batch_symeig(X):
 
 def weighted_8points(x_in, logits):
     # x_in: batch * 1 * N * 4 [32,1,500,4] logits[32,2,500,1]
-    mask = logits[:, 0, :, 0] #[32,500] logits的第一层
-    weights = logits[:, 1, :, 0] #[32,500] logits的第二层
+    mask = logits[:, 0, :, 0] 
+    weights = logits[:, 1, :, 0] 
 
     mask = torch.sigmoid(mask)
     weights = torch.exp(weights) * mask
@@ -114,19 +114,19 @@ class DGCNN_Block(nn.Module):
         assert self.knn_num == 9 or self.knn_num == 6
         if self.knn_num == 9:
             self.conv = nn.Sequential(
-                nn.Conv2d(self.in_channel*2, self.in_channel, (1, 3), stride=(1, 3)), #[32,128,2000,9]→[32,128,2000,3]
+                nn.Conv2d(self.in_channel*2, self.in_channel, (1, 3), stride=(1, 3)), 
                 nn.BatchNorm2d(self.in_channel),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(self.in_channel, self.in_channel, (1, 3)), #[32,128,2000,3]→[32,128,2000,1]
+                nn.Conv2d(self.in_channel, self.in_channel, (1, 3)), 
                 nn.BatchNorm2d(self.in_channel),
                 nn.ReLU(inplace=True),
             )
         if self.knn_num == 6:
             self.conv = nn.Sequential(
-                nn.Conv2d(self.in_channel*2, self.in_channel, (1, 3), stride=(1, 3)), #[32,128,2000,6]→[32,128,2000,2]
+                nn.Conv2d(self.in_channel*2, self.in_channel, (1, 3), stride=(1, 3)), 
                 nn.BatchNorm2d(self.in_channel),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(self.in_channel, self.in_channel, (1, 2)), #[32,128,2000,2]→[32,128,2000,1]
+                nn.Conv2d(self.in_channel, self.in_channel, (1, 2)), 
                 nn.BatchNorm2d(self.in_channel),
                 nn.ReLU(inplace=True),
             )
@@ -135,7 +135,7 @@ class DGCNN_Block(nn.Module):
         #feature[32,128,2000,1]
         B, _, N, _ = features.shape
         out = get_graph_feature(features, k=self.knn_num)
-        out = self.conv(out) #out[32,128,2000,1]
+        out = self.conv(out) 
         return out
 
 class GCN_Block(nn.Module):
@@ -149,24 +149,24 @@ class GCN_Block(nn.Module):
         )
 
     def attention(self, w):
-        w = torch.relu(torch.tanh(w)).unsqueeze(-1) #w[32,2000,1] 变成0到1的权重
-        A = torch.bmm(w,w.transpose(1, 2)) #A[32,1,1]
+        w = torch.relu(torch.tanh(w)).unsqueeze(-1) 
+        A = torch.bmm(w,w.transpose(1, 2)) 
         return A
 
     def graph_aggregation(self, x, w):
-        B, _, N, _ = x.size() #B=32,N=2000
+        B, _, N, _ = x.size() 
         with torch.no_grad():
-            A = self.attention(w) #A[32,1,1]
-            I = torch.eye(N).unsqueeze(0).to(x.device).detach() #I[1,2000,2000]单位矩阵
-            A = A + I #A[32,2000,2000]
-            D_out = torch.sum(A, dim=-1) #D_out[32,2000]
+            A = self.attention(w) 
+            I = torch.eye(N).unsqueeze(0).to(x.device).detach() 
+            A = A + I 
+            D_out = torch.sum(A, dim=-1) 
             D = (1 / D_out) ** 0.5
-            D = torch.diag_embed(D) #D[32,2000,2000]
+            D = torch.diag_embed(D) 
             L = torch.bmm(D, A)
-            L = torch.bmm(L, D) #L[32,2000,2000]
-        out = x.squeeze(-1).transpose(1, 2).contiguous() #out[32,2000,128]
+            L = torch.bmm(L, D) 
+        out = x.squeeze(-1).transpose(1, 2).contiguous() 
         out = torch.bmm(L, out).unsqueeze(-1)
-        out = out.transpose(1, 2).contiguous() #out[32,128,2000,1]
+        out = out.transpose(1, 2).contiguous() 
 
         return out
 
@@ -187,7 +187,7 @@ class DS_Block(nn.Module):
         self.sr = sampling_rate
 
         self.conv = nn.Sequential(
-            nn.Conv2d(self.in_channel, self.out_channel, (1, 1)), #4或6 → 128
+            nn.Conv2d(self.in_channel, self.out_channel, (1, 1)), 
             nn.BatchNorm2d(self.out_channel),
             nn.ReLU(inplace=True)
         )
@@ -313,12 +313,12 @@ class CLNet(nn.Module):
 
         w_ds0[0] = torch.relu(torch.tanh(w_ds0[0])).reshape(B, 1, -1, 1)
         w_ds0[1] = torch.relu(torch.tanh(w_ds0[1])).reshape(B, 1, -1, 1)
-        x_ = torch.cat([x1, w_ds0[0].detach(), w_ds0[1].detach()], dim=-1) #x_[32,1,1000,6] 剪枝后的特征并带上了权重信息
+        x_ = torch.cat([x1, w_ds0[0].detach(), w_ds0[1].detach()], dim=-1) 
 
-        x2, y2, ws1, w_ds1, e_hat = self.ds_1(x_, y1) #x_[32,1,1000,6],y1[32,1000]
+        x2, y2, ws1, w_ds1, e_hat = self.ds_1(x_, y1) 
 
         with torch.no_grad():
-            y_hat = batch_episym(x[:, 0, :, :2], x[:, 0, :, 2:], e_hat) #y_hat对称极线距离
+            y_hat = batch_episym(x[:, 0, :, :2], x[:, 0, :, 2:], e_hat)
         return ws0 + ws1, [y, y, y1, y1, y2], [e_hat], y_hat
 
 
