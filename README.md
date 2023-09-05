@@ -28,7 +28,7 @@ The initial matches are generated over SIFT by default.
 
 We provide a pretrained model on YFCC100M. The results in our paper can be reproduced by running the test script:
 
-    python main.py --run_mode=test --model_path=./log/train
+    python main.py --run_mode=test 
 ## Train model on YFCC100M
 Please run the training script to train our model on YFCC100M after the data processing is done.
 
