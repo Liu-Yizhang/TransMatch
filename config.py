@@ -52,27 +52,6 @@ net_arg.add_argument(
 
 # -----------------------------------------------------------------------------
 # Data
-# data_arg = add_argument_group("Data")
-# data_arg.add_argument(
-#     "--data_tr", type=str, default='/mnt/disk3/pingooo/OANet_dataset/CLNet_main/data_dump/yfcc-super-2000-train.hdf5', help=""
-#     "name of the dataset for train")
-# data_arg.add_argument(
-#     "--data_va", type=str, default='/mnt/disk3/pingooo/OANet_dataset/CLNet_main/data_dump/yfcc-super-2000-val.hdf5', help=""
-#     "name of the dataset for valid")
-# data_arg.add_argument(
-#     "--data_te", type=str, default='/mnt/disk3/pingooo/OANet_dataset/CLNet_main/data_dump/yfcc-super-2000-test.hdf5', help=""
-#     "name of the unseen dataset for test")
-
-# data_arg = add_argument_group("Data")
-# data_arg.add_argument(
-#     "--data_tr", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-superpoint-2000-train.hdf5', help=""
-#     "name of the dataset for train")
-# data_arg.add_argument(
-#     "--data_va", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-superpoint-2000-val.hdf5', help=""
-#     "name of the dataset for valid")
-# data_arg.add_argument(
-#     "--data_te", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-superpoint-2000-test.hdf5', help=""
-#     "name of the unseen dataset for test")
 
 data_arg = add_argument_group("Data")
 data_arg.add_argument(
@@ -141,17 +120,15 @@ train_arg.add_argument( #liyp
 train_arg.add_argument(
     "--train_batch_size", type=int, default=64, help=""
     "batch size")
-    # "--train_batch_size", type=int, default=2, help="" #liyp
-    # "batch size")
 train_arg.add_argument(
     "--gpu_id", type=str, default='0,1,2,3', help='id(s) for CUDA_VISIBLE_DEVICES')
 train_arg.add_argument(
     "--num_processor", type=int, default=8, help='numbers of used cpu')
 train_arg.add_argument(
-    "--train_iter", type=int, default=1046875, help=""#liyp
+    "--train_iter", type=int, default=500000, help=""
     "training iterations to perform")
 train_arg.add_argument(
-    "--log_base", type=str, default="./log_sun3d_1_0.5_lyz1/", help=""
+    "--log_base", type=str, default="./log/", help=""
     "save directory name inside results")
 train_arg.add_argument(
     "--log_suffix", type=str, default="", help=""
@@ -170,7 +147,7 @@ test_arg.add_argument(
     "--use_ransac", type=str2bool, default=False, help=""
     "use ransac when testing?")
 test_arg.add_argument(
-    "--model_path", type=str, default="./log_sun3d_1_0.5_lyz1/train", help=""
+    "--model_path", type=str, default="./log/train", help=""
     "saved best model path for test")
 test_arg.add_argument(
     "--res_path", type=str, default="", help=""
