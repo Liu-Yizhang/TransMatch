@@ -74,26 +74,15 @@ net_arg.add_argument(
 #     "--data_te", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-superpoint-2000-test.hdf5', help=""
 #     "name of the unseen dataset for test")
 
-# data_arg = add_argument_group("Data")
-# data_arg.add_argument(
-#     "--data_tr", type=str, default='/mnt/disk2/pingooo/data_dump/sun3d-sift-2000-train.hdf5', help=""
-#     "name of the dataset for train")
-# data_arg.add_argument(
-#     "--data_va", type=str, default='/mnt/disk2/pingooo/data_dump/sun3d-sift-2000-val.hdf5', help=""
-#     "name of the dataset for valid")
-# data_arg.add_argument(
-#     "--data_te", type=str, default='/mnt/disk2/pingooo/data_dump/sun3d-sift-2000-test.hdf5', help=""
-#     "name of the unseen dataset for test")
-
 data_arg = add_argument_group("Data")
 data_arg.add_argument(
-    "--data_tr", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-sift-2000-train.hdf5', help=""
+    "--data_tr", type=str, default='/home/lyp_3090/code/OANet/data_dump/yfcc-sift-2000-train.hdf5', help=""
     "name of the dataset for train")
 data_arg.add_argument(
-    "--data_va", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-sift-2000-val.hdf5', help=""
+    "--data_va", type=str, default='/home/lyp_3090/code/OANet/data_dump/yfcc-sift-2000-val.hdf5', help=""
     "name of the dataset for valid")
 data_arg.add_argument(
-    "--data_te", type=str, default='/mnt/disk2/pingooo/data_dump/yfcc-sift-2000-test.hdf5', help=""
+    "--data_te", type=str, default='/home/lyp_3090/code/OANet/data_dump/yfcc-sift-2000-test.hdf5', help=""
     "name of the unseen dataset for test")
 
 # -----------------------------------------------------------------------------
@@ -159,10 +148,10 @@ train_arg.add_argument(
 train_arg.add_argument(
     "--num_processor", type=int, default=8, help='numbers of used cpu')
 train_arg.add_argument(
-    "--train_iter", type=int, default=104687500, help=""#liyp
+    "--train_iter", type=int, default=1046875, help=""#liyp
     "training iterations to perform")
 train_arg.add_argument(
-    "--log_base", type=str, default="./log_transmatch_yfcc_sift8/", help=""
+    "--log_base", type=str, default="./log_sun3d_1_0.5_lyz1/", help=""
     "save directory name inside results")
 train_arg.add_argument(
     "--log_suffix", type=str, default="", help=""
@@ -181,7 +170,7 @@ test_arg.add_argument(
     "--use_ransac", type=str2bool, default=False, help=""
     "use ransac when testing?")
 test_arg.add_argument(
-    "--model_path", type=str, default="./log_transmatch_yfcc_sift8/train", help=""
+    "--model_path", type=str, default="./log_sun3d_1_0.5_lyz1/train", help=""
     "saved best model path for test")
 test_arg.add_argument(
     "--res_path", type=str, default="", help=""
